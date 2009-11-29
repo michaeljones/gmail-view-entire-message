@@ -9,31 +9,53 @@
 // ==/UserScript==
 
 // Executed onload
-
 window.addEventListener('load', function() {
-  if (unsafeWindow.gmonkey) {
-    unsafeWindow.gmonkey.load('1.0', init)
-  }
+
+	// Load Greasemonkey Gmail API with our callback
+	if (unsafeWindow.gmonkey) {
+		unsafeWindow.gmonkey.load('1.0', init);
+	}
 }, true);
 
 
+function addViewMessageLink() {
+
+	var gmail = unsafeWindow.gmonkey.get("1.0");
+	var viewType = gmail.getActiveViewType();
+
+	// Return if we're not in a conversation view
+	if ( viewType != "cv" ) return;
+
+	// Find the link they add at the bottom of the page
+	var root = gmail.getActiveViewElement();
+	var node = jQuery("a:contains('View entire message')", root);	
+
+	if ( ! node ) return;
+
+	// Get the main div for the message and the link's href
+	var parent_ = node.parent();
+	var url = node.attr("href");
+
+	if ( ! parent_ ) return;
+
+	// Add our own text and link at the top of the message div
+	parent_.prepend('This message has been clipped: <a href="' + url + '" target="_blank">View entire message</a>');
+}
+
 function init(gmail)
 {
-	gmail.registerViewChangeCallback(function (viewType) {
+	// Setting time delay upon advice from:
+	// http://eric.biven.us/2008/11/25/using-the-gmail-greasemonkey-api-and-succeeding-my-workaround/
+	window.setTimeout(function() {
 
-		var root = gmail.getActiveViewElement();
-		var node = jQuery("a:contains('View entire message')", root);	
+		// Add message for this page load
+		// Appears necessary after testing
+		addViewMessageLink();
 
-		if ( ! node ) return;
+		// Register our method as a callback for future events
+		gmail.registerViewChangeCallback(addViewMessageLink);
 
-		var parent_ = node.parent();
-
-		var url = node.attr("href");
-
-		if ( ! parent_ ) return;
-
-		parent_.prepend('This message has been clipped: <a href="' + url + '" target="_blank">View entire message</a>');
-	});
+	}, 500);
 }
 
 
