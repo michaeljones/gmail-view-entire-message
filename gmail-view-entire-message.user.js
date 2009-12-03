@@ -44,18 +44,12 @@ function addViewMessageLink() {
 
 function init(gmail)
 {
-	// Setting time delay upon advice from:
-	// http://eric.biven.us/2008/11/25/using-the-gmail-greasemonkey-api-and-succeeding-my-workaround/
-	window.setTimeout(function() {
+	// Add message for this page load
+	// Appears necessary after testing
+	addViewMessageLink();
 
-		// Add message for this page load
-		// Appears necessary after testing
-		addViewMessageLink();
-
-		// Register our method as a callback for future events
-		gmail.registerViewChangeCallback(addViewMessageLink);
-
-	}, 500);
+	// Register our method as a callback for future events
+	gmail.registerViewChangeCallback(addViewMessageLink);
 }
 
 
